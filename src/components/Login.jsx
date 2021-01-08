@@ -14,15 +14,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import AuthService from './services/auth.service';
 
-const required = (value) => {
-  if (!value) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        This field is required!
-      </div>
-    );
-  }
-};
 
 function Copyright() {
   return (
@@ -59,12 +50,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SignIn = (props) => {
-  const form = useRef();
-  const checkBtn = useRef();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const classes = useStyles();
 
   const onChangeUsername = (e) => {
@@ -79,7 +67,6 @@ const SignIn = (props) => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    setMessage('');
     setLoading(true);
     AuthService.login(username, password).then(
       () => {
@@ -87,14 +74,8 @@ const SignIn = (props) => {
         window.location.reload();
       },
       (error) => {
-        const resMessage = (error.response
-            && error.response.data
-            && error.response.data.message)
-          || error.message
-          || error.toString();
-
+        console.log(error.response.data.detail);
         setLoading(false);
-        setMessage(resMessage);
       },
     );
   };
@@ -109,7 +90,7 @@ const SignIn = (props) => {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form} noValidate onSubmit={handleLogin} ref={form}>
+        <form className={classes.form} noValidate onSubmit={handleLogin}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -136,15 +117,8 @@ const SignIn = (props) => {
             onChange={onChangePassword}
             autoComplete="current-password"
           />
-          {message && (
-          <div className="form-group">
-            <div className="alert alert-danger" role="alert">
-              {message}
-            </div>
-          </div>
-          )}
           <FormControlLabel
-            control={<Checkbox value="remember" color="primary" ref={checkBtn} />}
+            control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
           />
           <Button
@@ -163,7 +137,7 @@ const SignIn = (props) => {
               </Link>
             </Grid>
             <Grid item>
-              <Link href="http://localhost:8080/" variant="body2">
+              <Link href="/signup" variant="body2">
                 have an account? Sign Up
               </Link>
             </Grid>

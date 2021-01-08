@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import Button from '@material-ui/core/Button';
 import UserService from './services/user.service';
+import AuthService from './services/auth.service';
 
 const BoardUser = () => {
   const [content, setContent] = useState([]);
@@ -15,24 +18,28 @@ const BoardUser = () => {
     { name: 'Reference', active: false },
   ]);
 
+  const history = useHistory();
+  const Redirect = () => {
+    history.push('/');
+  };
+
   useEffect(() => {
     UserService.getUserBoard().then(
       (response) => {
+        /* console.log(response.data); */
         setContent(response.data);
-        console.log(response.data);
       },
       (error) => {
-        const contenidoError = (error.response
-            && error.response.data
-            && error.response.data.message)
-          || error.message
-          || error.toString();
-
-        setContent(contenidoError);
+        /* console.log(error.response.data.detail); */
+        Redirect();
       },
     );
   }, []);
 
+  const logOut = () => {
+    AuthService.logout();
+    Redirect();
+  };
   return (
     <>
       <Table>
@@ -56,6 +63,9 @@ const BoardUser = () => {
           ))}
         </TableBody>
       </Table>
+      <Button variant="contained" color="primary" onClick={logOut} size="large">
+        Log Out
+      </Button>
     </>
   );
 };
