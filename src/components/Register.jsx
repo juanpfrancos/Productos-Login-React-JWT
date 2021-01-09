@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -9,14 +9,16 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import Alert from '@material-ui/lab/Alert';
+import { useHistory } from 'react-router-dom';
 import AuthService from './services/auth.service';
 
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+      <Link color="inherit" href="https://twitter.com/juanpfrancos">
+        Juanpfrancos
       </Link>
       {' '}
       {new Date().getFullYear()}
@@ -52,13 +54,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function SignUp() {
-  const form = useRef();
-  const checkBtn = useRef();
-
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
   const [successful, setSuccessful] = useState(false);
-  const [message, setMessage] = useState('');
+  const [matchpass, setMatchpass] = useState(false);
+  const [unmatchMessage, setUnmatchmessage] = useState('');
+  const [button, setButton] = useState(true);
 
   const onChangeUsername = (e) => {
     const username = e.target.value;
@@ -70,33 +72,42 @@ function SignUp() {
     setPassword(password);
   };
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-
-    setMessage('');
-    setSuccessful(false);
-
-    form.current.validateAll();
-
-    if (checkBtn.current.context._errors.length === 0) {
-      AuthService.register(username, password).then(
-        (response) => {
-          setMessage(response.data.message);
-          setSuccessful(true);
-        },
-        (error) => {
-          const resMessage = (error.response
-              && error.response.data
-              && error.response.data.message)
-            || error.message
-            || error.toString();
-
-          setMessage(resMessage);
-          setSuccessful(false);
-        },
-      );
+  const onChangePassword2 = (e) => {
+    const password2 = e.target.value;
+    setPassword2(password2);
+    if (username !== '' && password === password2) {
+      setUnmatchmessage('');
+      setMatchpass(false);
+      setButton(false);
+    } else {
+      setUnmatchmessage("Passwords don't match");
+      setMatchpass(true);
     }
   };
+
+  const history = useHistory();
+  const Redirect = () => {
+    history.push('/');
+  };
+  const handleRegister = (e) => {
+    e.preventDefault();
+    setSuccessful(false);
+
+    AuthService.register(username, password).then(
+      (response) => {
+        setSuccessful(true);
+        console.log('Creado exitosamente');
+
+        setTimeout(() => {
+          Redirect();
+        }, 10000);
+      },
+      (error) => {
+        setSuccessful(false);
+      },
+    );
+  };
+
   const classes = useStyles();
 
   return (
@@ -109,7 +120,7 @@ function SignUp() {
         <Typography component="h1" variant="h5">
           Sign Up
         </Typography>
-        <form className={classes.form} noValidate onSubmit={handleRegister} ref={form}>
+        <form className={classes.form} noValidate onSubmit={handleRegister}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -133,6 +144,8 @@ function SignUp() {
             type="password"
             id="password"
             autoComplete="current-password"
+            error={matchpass}
+            onChange={onChangePassword}
           />
           <TextField
             variant="outlined"
@@ -142,10 +155,11 @@ function SignUp() {
             name="password"
             type="password"
             autoComplete="current-password"
-            helperText="Passwords don't match"
+            helperText={unmatchMessage}
             id="password"
             label="Password"
-            error
+            error={matchpass}
+            onChange={onChangePassword2}
           />
           <Button
             type="submit"
@@ -153,6 +167,7 @@ function SignUp() {
             variant="contained"
             color="primary"
             className={classes.submit}
+            disabled={button}
           >
             Sign Up
           </Button>
@@ -165,6 +180,7 @@ function SignUp() {
       <form className={classes.root} noValidate autoComplete="off">
         <div />
       </form>
+
     </Container>
   );
 }
